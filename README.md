@@ -42,7 +42,7 @@ mcp_servers:
     description: "LazyAds MCP — 9-platform ad management"
 ```
 
-Hermes skill: [lazyads.ai/hermes](https://lazyads.ai/hermes)
+Hermes skill: [`SKILL.md`](./SKILL.md) in this repo, or the live guide at [lazyads.ai/hermes](https://lazyads.ai/hermes)
 
 ## What you get
 

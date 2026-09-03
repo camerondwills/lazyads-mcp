@@ -14,7 +14,7 @@ This repository is documentation only. It does not contain product source code.
 
 Docs: [lazyads.ai/mcp](https://lazyads.ai/mcp)
 
-## Connect your client
+## Connect your client ([lazyads.ai/mcp#setup](https://lazyads.ai/mcp#setup))
 
 Cursor (`.cursor/mcp.json`) and Claude Code (`.mcp.json`):
 
@@ -63,7 +63,7 @@ Hermes skill: [`SKILL.md`](./SKILL.md) in this repo, or the live guide at [lazya
 - **BYOA:** 33 bridge tools to create, update, pause, and measure campaigns on all nine networks
 - **Starter and above:** full suite (47 tools), including 14 Lazy Ads AI tools
 
-Free accounts can onboard and browse competitor ads. AI tools require a paid plan with tokens. REST and outbound webhooks require Growth or above.
+Free accounts can onboard and browse competitor ads. Lazy Ads AI tools require Starter or above. REST and outbound webhooks require Growth or above.
 
 ## Pricing
 

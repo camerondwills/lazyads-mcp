@@ -14,20 +14,24 @@ This repository is documentation only. It does not contain product source code.
 
 Docs: [lazyads.ai/mcp](https://lazyads.ai/mcp)
 
-## Connect (Claude / Cursor / Windsurf)
+## Connect your client
+
+Cursor (`.cursor/mcp.json`) and Claude Code (`.mcp.json`):
 
 ```json
 {
   "mcpServers": {
     "lazyads": {
       "url": "https://mcp.lazyads.ai/mcp",
-      "headers": {
-        "Authorization": "Bearer your-api-key"
-      }
+      "headers": { "Authorization": "Bearer la_your_api_key" }
     }
   }
 }
 ```
+
+Claude Code one-liner: `claude mcp add --transport http lazyads https://mcp.lazyads.ai/mcp --header "Authorization: Bearer la_your_api_key"`
+
+Windsurf uses `serverUrl` instead of `url`. Gemini CLI uses `httpUrl`. VS Code uses `servers` with `"type": "http"`. Codex CLI reads `[mcp_servers.lazyads]` with `url` and `bearer_token_env_var = "LAZY_ADS_API_KEY"` from `~/.codex/config.toml`. Claude Desktop only launches local processes, so bridge it with `mcp-remote` and put the header in `env`. Copy-ready blocks for every client: https://lazyads.ai/mcp#setup
 
 `X-API-Key` is also accepted.
 

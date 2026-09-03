@@ -1,115 +1,146 @@
 ---
-name: Lazy Ads
-description: Use this when the user wants to create, manage, or optimize paid ads via Lazy Ads MCP (Google, Meta, TikTok, LinkedIn, Reddit, Apple, Bing, ChatGPT, Snapchat).
+name: lazyads
+description: Manage ad campaigns across Meta, Google, TikTok, LinkedIn, Reddit, Apple, Bing, ChatGPT, and Snapchat Ads via the hosted LazyAds MCP server.
+  Bridge mode (BYOA) lets your agent create/edit/monitor campaigns without Lazy Ads AI.
+  Full MCP (Starter+) also unlocks Lazy Ads AI builds, creatives, optimisation, and competitor intelligence.
+tags: [advertising, ads, meta, google, tiktok, linkedin, reddit, apple, bing, chatgpt, snapchat, marketing, campaigns, mcp, byoa]
 ---
 
-# Lazy Ads
+# LazyAds Skill
 
-Connect Hermes (or any MCP-capable agent) to **Lazy Ads** over the hosted MCP so you can create, update, pause, and measure paid campaigns across **nine ad networks**. Meta counts as one network (Facebook + Instagram).
+## What LazyAds Does
+LazyAds is an ad management platform covering 9 platforms:
+Meta (Facebook/Instagram), Google Ads, TikTok, LinkedIn, Reddit, Apple Ads, Bing Ads, ChatGPT Ads, and Snapchat Ads.
+Instead of connecting each platform separately, LazyAds exposes everything
+through a single MCP connection and API key.
 
-**Product framing**
+Endpoint: `https://mcp.lazyads.ai/mcp` (Streamable HTTP, MCP 2026-07-28, stateless — no session
+handshake). Send `Authorization: Bearer <api-key>` (or `X-API-Key`) on every request.
+Per-key rate limits (1-minute window): BYOA 60, Starter 30, Growth 100, Scale 500, Enterprise 1000.
+Exceeding returns 429 with `Retry-After`.
 
-- The main product is **Lazy Ads agent tiers** (Starter and above include Lazy Ads AI).
-- **MCP / BYOA** is the advanced path: bring your own agent and call Lazy Ads tools over Streamable HTTP.
-- Flat-fee SaaS. Bring your own ad accounts. **No percent of spend.**
-- Do not invent ROAS, customer counts, or “free AI strategy.” Free accounts get onboarding and competitor-ad browse — not AI tokens.
+Two access modes:
+- **Bridge (BYOA + every paid plan)** — 33 tools; your agent supplies strategy/copy; LazyAds is the connector to ad accounts and syncs stats to the dashboard. Never spends Lazy Ads AI credits.
+- **Full MCP (Starter / Growth / Scale / Enterprise)** — 47 tools total; bridge plus 14 Lazy Ads AI tools (campaign build, chat, creative generation, optimisation, competitor AI, activity log).
 
-## When to use this skill
+The live catalog with descriptions is at https://lazyads.ai/mcp#tools.
 
-Use Lazy Ads when the user asks to:
+## Setup
+1. Sign up at https://lazyads.ai/pricing (BYOA for bridge-only, or Starter+ for full MCP)
+2. Connect your ad platform accounts in the Lazy Ads dashboard (ChatGPT Ads can also be connected with `connect_chatgpt_ads` using an Ads Manager API key; every other platform uses dashboard OAuth or BYO-key cards)
+3. Generate an API key at Settings → API (https://lazyads.ai/dashboard/settings?tab=api) and store it:
+   ```
+   # ~/.hermes/.env
+   LAZY_ADS_API_KEY=la_your_api_key
+   ```
+4. Add the server to `~/.hermes/config.yaml` (see https://lazyads.ai/hermes):
+   ```yaml
+   mcp_servers:
+     lazyads:
+       url: "https://mcp.lazyads.ai/mcp"
+       headers:
+         Authorization: "Bearer ${LAZY_ADS_API_KEY}"
+   ```
+   Local development against a Lazy Ads checkout: `http://127.0.0.1:3100/mcp`.
+5. Restart Hermes. Confirm with "Which ad platforms am I connected to?" (`list_platform_connections`).
 
-- Connect or list ad platform accounts
-- Create, edit, pause, or resume campaigns / ads / creatives
-- Pull performance or spend across networks
-- Compare or browse competitor ads (where the plan allows)
-- Run multi-network work from one agent conversation
+## When to Use This Skill
+Load when the user asks about:
+- Their ad campaigns (performance, status, spend, ROAS, breakdowns)
+- Creating, importing, pausing, scaling, or building campaigns
+- Syncing live platform metrics into the Lazy Ads dashboard
+- Ad-set level controls: budgets, bids, targeting, keywords
+- Ad creative (browse/attach on any paid plan; generate/score on full MCP)
+- Competitor ad activity (full MCP for Ad Library search and AI analysis)
+- Whether an ad account can spend (`check_platform_billing`)
 
-Prefer Lazy Ads MCP over ad-hoc browser clicks when the user already has a Lazy Ads API key and wants agent-driven ops.
+## Bridge MCP Tools (BYOA-safe, 33)
+### Create and publish
+- `create_manual_campaign` — create on Meta/Google/TikTok/LinkedIn/Reddit/Apple/Bing/ChatGPT/Snapchat + Lazy Ads (`aiManaged=false`; LinkedIn = campaign group)
+- `create_manual_ad_set` — ad set / ad group with geo, age, gender, interests, keywords, custom audiences
+- `create_manual_ad` — ads with copy/creative (Meta needs `create_meta_ad_creative` first; others take `imageUrl`)
+- `create_meta_ad_creative` — Meta creative from a public image URL + copy
+- `list_platform_audiences` — Meta/TikTok custom audiences to attach via `targeting.customAudienceIds`
+- `update_manual_campaign` — name/objective/daily budget/end date on Lazy Ads + platform
+- `duplicate_campaign` — clone a campaign into a new draft
 
-## Prerequisites
+### Import and sync
+- `list_live_platform_campaigns` — list campaigns directly from a connected ad account
+- `import_platform_campaign` — link an existing live campaign into Lazy Ads
+- `sync_campaign_performance` / `sync_all_campaign_performance` — pull live metrics into the **unified Lazy Ads dashboard** (1–90 days)
 
-1. Hermes installed (or another MCP client — Claude, Cursor, Windsurf, etc.).
-2. A Lazy Ads **paid** plan (BYOA bridge or Starter+).
-3. An API key from Lazy Ads → **Settings → API**.
+### Manage live campaigns
+- `list_campaigns` — Lazy Ads campaigns with status + latest synced metrics
+- `get_ad_details` — full ad set + ad copy + creative details
+- `pause_resume_campaign` / `pause_resume_ad_set` / `pause_resume_ad` — propagates to the live platform
+- `set_campaign_budget` / `set_ad_set_budget` — daily budgets (ad-set budgets on Meta ABO, TikTok, LinkedIn, Reddit)
+- `update_ad_set_targeting` — live audience targeting when the platform API allows it
+- `update_ad_set_bid` — manual bid on LinkedIn, TikTok, ChatGPT, or Snapchat (null = LinkedIn auto bid)
+- `add_ad_set_keywords` — Google / Bing / Apple search keywords with match types
 
-## Install the skill (Hermes)
+### Analytics
+- `get_campaign_performance` / `get_ad_spend_summary` / `get_breakdown_data` / `get_best_performing_creative` / `compare_campaigns`
 
-Copy this file to:
+### Creatives, audiences, and account
+- `list_creatives` (lifetime ROAS/spend + predicted scores) / `attach_creative_to_ad`
+- `list_audiences` — audiences currently used across ad sets
+- `list_platform_connections` / `connect_chatgpt_ads` / `check_platform_billing`
+- `get_recent_notifications`
 
-```text
-~/.hermes/skills/lazyads/SKILL.md
-```
+### BYOA hierarchy workflow
+1. `create_manual_campaign` (platform + objective + budget)
+2. `create_manual_ad_set` (targeting / audiences)
+3. Meta: `create_meta_ad_creative` → `create_manual_ad`; others: `create_manual_ad` with `imageUrl`
+4. `sync_campaign_performance` so the Lazy Ads dashboard shows spend/ROAS without logging into each ads manager
 
-Create the directory if needed:
+## Full MCP Tools (Starter+, adds 14)
+### Campaign build and automation
+- `build_ai_campaign` — trigger a full Lazy Ads AI campaign build. Same options as the dashboard and REST `POST /api/v1/campaigns/build`: `platforms`, `dailyBudgetUsd`, `objectiveOverride`, `creativeMix` (`ai_decide` | `images_only` | `videos_only` | `images_and_videos` | `existing`), `preferredCreativeIds`, `preferredPagePostId`, `socialContentIds`, `referenceCreativeIds`, `customInstructions`, `skipCompetitorAnalysis`, `confirmNotPolitical`.
+- `get_campaign_build_status` — poll build progress (2–5 minutes)
+- `set_campaign_automation` — toggle Tracking (dashboard + analysis) and Management (optimizer may edit) on a campaign
 
-```bash
-mkdir -p ~/.hermes/skills/lazyads
-# place SKILL.md in that folder
-```
+### AI and optimisation
+- `get_optimization_suggestions` — AI analysis with action recommendations
+- `chat_with_lazy_ads` — ask the Lazy Ads assistant anything about the account (it can act)
+- `get_creative_score` — predicted performance before launch
+- `generate_creative` — AI image/video generation (credits + quota enforced)
+- `get_audience_suggestions` — AI targeting from a description
 
-This matches the live Hermes guide: [lazyads.ai/hermes](https://lazyads.ai/hermes).  
-(Optional later: `hermes skills install official/…` once Lazy Ads is in the Nous optional-skills catalog — not available yet.)
+### Competitor intelligence
+- `list_competitors` / `search_competitor_ads` / `get_competitor_analysis` / `scan_competitor_ads`
 
-## Add the MCP server (Streamable HTTP + API key)
+### Activity
+- `get_ai_activity` — recent Lazy Ads AI tasks
+- `list_activity` — searchable user-facing log: credit charges and campaign/ad-set/ad changes
 
-**Hosted endpoint:** `https://mcp.lazyads.ai/mcp`  
-**Registry:** `ai.lazyads/mcp`  
-Prefer **Streamable HTTP**. Send **`Authorization: Bearer <key>`** or **`X-API-Key: <key>`** on every request.
+## Example Workflows
 
-### Hermes (`config.yaml`)
+### BYOA: Manual Campaign Launch
+"Create a Meta campaign named Summer Sale with OUTCOME_SALES objective and $40/day, then sync performance after it has data."
+→ `create_manual_campaign` → `create_manual_ad_set` → `create_meta_ad_creative` → `create_manual_ad` → later `sync_campaign_performance`
 
-```yaml
-mcp_servers:
-  lazyads:
-    url: "https://mcp.lazyads.ai/mcp"
-    headers:
-      Authorization: "Bearer your-api-key"
-      # or: X-API-Key: "your-api-key"
-    description: "LazyAds MCP — 9-platform ad management"
-```
+### Import what is already running
+"Bring my live Google campaigns into Lazy Ads."
+→ `list_live_platform_campaigns` (platform=google) → `import_platform_campaign` per id → `sync_all_campaign_performance`
 
-### Claude / Cursor / Windsurf (JSON)
+### Morning Campaign Review
+"Check my campaigns — anything I should be worried about today?"
+→ `list_campaigns` + `get_campaign_performance` (+ `get_breakdown_data` for the outlier)
 
-```json
-{
-  "mcpServers": {
-    "lazyads": {
-      "url": "https://mcp.lazyads.ai/mcp",
-      "headers": {
-        "Authorization": "Bearer your-api-key"
-      }
-    }
-  }
-}
-```
+### Pause Underperformers
+"Pause any campaigns where CPA is more than 2× my target for 3+ days"
+→ identify via performance tools, then `pause_resume_campaign` / `pause_resume_ad_set` / `pause_resume_ad`
 
-Replace `your-api-key` with the key from Settings → API. Do not commit keys.
+### Full MCP: AI Campaign Build
+"Build me a Meta campaign for my best-selling product with $50/day budget"
+→ `build_ai_campaign` + `get_campaign_build_status` (Starter+ only)
 
-## Plans and tools
-
-- **BYOA** — bring-your-own-agent bridge: campaign create/edit/pause/read across the nine networks. Historically **33** bridge tools.
-- **Starter+** — full MCP including Lazy Ads AI. **Do not hard-code a suite size in prompts.** For the live tool catalog, open [lazyads.ai/mcp](https://lazyads.ai/mcp).
-
-Nine networks: Meta (Facebook + Instagram), Google, TikTok, LinkedIn, Reddit, Apple, Bing, ChatGPT, Snapchat.
-
-## Verify
-
-1. Restart Hermes (or reload MCP in your client) after saving config.
-2. Confirm the `lazyads` server is connected and tools appear.
-3. Smoke with a **read-only** prompt first, for example:
-   - “List my Lazy Ads platform connections.”
-   - “What campaigns are active on Meta and Google?”
-4. If tools are missing or auth fails: check Bearer vs `X-API-Key`, key validity, and that the account is on a paid plan.
-
-## Approval and hands-off
-
-- Default to **propose → user approve → apply** for spend-changing or publish actions (new campaigns, budget changes, pause/unpause at scale).
-- **Hands-off** / autonomous act-within-rules is a Starter+ Lazy Ads AI product behavior — only use it when the user has enabled it and stated the rules. Do not invent approvals or spend caps.
-- Label any example dollar figures as **illustrative**, not account metrics.
-
-## Docs
-
-- MCP setup + tool list: [https://lazyads.ai/mcp](https://lazyads.ai/mcp)
-- Hermes guide: [https://lazyads.ai/hermes](https://lazyads.ai/hermes)
-- Pricing (flat SaaS): [https://lazyads.ai/pricing](https://lazyads.ai/pricing)
-- Public listing repo: [https://github.com/camerondwills/lazyads-mcp](https://github.com/camerondwills/lazyads-mcp)
+## Pitfalls
+- BYOA cannot call Lazy Ads AI tools (`build_ai_campaign`, `chat_with_lazy_ads`, `generate_creative`, `scan_competitor_ads`, etc.); the server answers with a plan error, not an OpenRouter error
+- Bridge create/update requires a connected platform account in the dashboard; run `check_platform_billing` before launching spend
+- Campaign builds (full MCP) take 2–5 minutes — poll with `get_campaign_build_status`
+- Creative generation and AI builds consume monthly AI credits on AI plans
+- LinkedIn and Reddit do not report revenue via API; ROAS can show 0 there
+- Prefer `sync_all_campaign_performance` over one sync per campaign to stay under the per-minute rate limit
+- Do not expect a sticky MCP session — the API key (and any protocol headers your client manages) goes on every call
+- The REST API and outbound webhooks are Growth+; BYOA/Starter keys are MCP-only

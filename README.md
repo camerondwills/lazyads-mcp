@@ -33,13 +33,23 @@ Docs: [lazyads.ai/mcp](https://lazyads.ai/mcp)
 
 ## Connect (Hermes)
 
+Store the key in `~/.hermes/.env` as `LAZY_ADS_API_KEY=la_...`, then:
+
 ```yaml
 mcp_servers:
   lazyads:
     url: "https://mcp.lazyads.ai/mcp"
     headers:
-      Authorization: "Bearer your-api-key"
-    description: "LazyAds MCP — 9-platform ad management"
+      Authorization: "Bearer ${LAZY_ADS_API_KEY}"
+    description: "LazyAds MCP. 9-platform ad management"
+```
+
+Install the skill:
+
+```bash
+mkdir -p ~/.hermes/skills/lazyads
+curl -fsSL https://raw.githubusercontent.com/camerondwills/lazyads-mcp/main/SKILL.md \
+  -o ~/.hermes/skills/lazyads/SKILL.md
 ```
 
 Hermes skill: [`SKILL.md`](./SKILL.md) in this repo, or the live guide at [lazyads.ai/hermes](https://lazyads.ai/hermes)
@@ -47,13 +57,13 @@ Hermes skill: [`SKILL.md`](./SKILL.md) in this repo, or the live guide at [lazya
 ## What you get
 
 - **BYOA:** 33 bridge tools to create, update, pause, and measure campaigns on all nine networks
-- **Starter and above:** full suite (45 tools), including Lazy Ads AI
+- **Starter and above:** full suite (47 tools), including 14 Lazy Ads AI tools
 
-Free accounts can onboard and browse competitor ads. AI tools require a paid plan with tokens.
+Free accounts can onboard and browse competitor ads. AI tools require a paid plan with tokens. REST and outbound webhooks require Growth or above.
 
 ## Pricing
 
-See [lazyads.ai/pricing](https://lazyads.ai/pricing). Plans: BYOA, Starter, Growth, Scale. Flat SaaS, bring your own ad accounts, no percent of spend.
+See [lazyads.ai/pricing](https://lazyads.ai/pricing). Plans: BYOA, Starter, Growth, Scale, Enterprise. Flat SaaS, bring your own ad accounts, no percent of spend.
 
 ## Links
 

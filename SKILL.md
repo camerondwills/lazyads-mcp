@@ -26,6 +26,8 @@ Two access modes:
 The live catalog with descriptions is at https://lazyads.ai/mcp#tools.
 
 ## Setup
+Install via skills.sh: `npx skills add camerondwills/lazyads-mcp`
+
 1. Sign up at https://lazyads.ai/pricing (BYOA for bridge-only, or Starter+ for full MCP)
 2. Connect your ad platform accounts in the Lazy Ads dashboard (ChatGPT Ads can also be connected with `connect_chatgpt_ads` using an Ads Manager API key; every other platform uses dashboard OAuth or BYO-key cards)
 3. Generate an API key at Settings → API (https://lazyads.ai/dashboard/settings?tab=api) and store it:

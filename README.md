@@ -58,6 +58,12 @@ curl -fsSL https://raw.githubusercontent.com/camerondwills/lazyads-mcp/main/SKIL
 
 Hermes skill: [`SKILL.md`](./SKILL.md) in this repo, or the live guide at [lazyads.ai/hermes](https://lazyads.ai/hermes)
 
+**skills.sh**
+
+```bash
+npx skills add camerondwills/lazyads-mcp
+```
+
 ## What you get
 
 - **BYOA:** 33 bridge tools to create, update, pause, and measure campaigns on all nine networks

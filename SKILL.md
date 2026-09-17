@@ -20,8 +20,8 @@ Per-key rate limits (1-minute window): BYOA 60, Starter 30, Growth 100, Scale 50
 Exceeding returns 429 with `Retry-After`.
 
 Two access modes:
-- **Bridge (BYOA + every paid plan)** — 33 tools; your agent supplies strategy/copy; LazyAds is the connector to ad accounts and syncs stats to the dashboard. Never spends Lazy Ads AI credits.
-- **Full MCP (Starter / Growth / Scale / Enterprise)** — 47 tools total; bridge plus 14 Lazy Ads AI tools (campaign build, chat, creative generation, optimisation, competitor AI, activity log).
+- **Bridge (BYOA + every paid plan)** — 37 tools; your agent supplies strategy/copy; LazyAds is the connector to ad accounts and syncs stats to the dashboard. Never spends Lazy Ads AI credits.
+- **Full MCP (Starter / Growth / Scale / Enterprise)** — 51 tools total; bridge plus 14 Lazy Ads AI tools (campaign build, chat, creative generation, optimisation, competitor AI, activity log).
 
 The live catalog with descriptions is at https://lazyads.ai/mcp#tools.
 
@@ -56,13 +56,12 @@ Load when the user asks about:
 - Competitor ad activity (full MCP for Ad Library search and AI analysis)
 - Whether an ad account can spend (`check_platform_billing`)
 
-## Bridge MCP Tools (BYOA-safe, 33)
+## Bridge MCP Tools (BYOA-safe, 37)
 ### Create and publish
 - `create_manual_campaign` — create on Meta/Google/TikTok/LinkedIn/Reddit/Apple/Bing/ChatGPT/Snapchat + Lazy Ads (`aiManaged=false`; LinkedIn = campaign group)
 - `create_manual_ad_set` — ad set / ad group with geo, age, gender, interests, keywords, custom audiences
 - `create_manual_ad` — ads with copy/creative (Meta needs `create_meta_ad_creative` first; others take `imageUrl`)
 - `create_meta_ad_creative` — Meta creative from a public image URL + copy
-- `list_platform_audiences` — Meta/TikTok custom audiences to attach via `targeting.customAudienceIds`
 - `update_manual_campaign` — name/objective/daily budget/end date on Lazy Ads + platform
 - `duplicate_campaign` — clone a campaign into a new draft
 
@@ -86,10 +85,16 @@ Load when the user asks about:
 ### Creatives, audiences, and account
 - `list_creatives` (lifetime ROAS/spend + predicted scores) / `attach_creative_to_ad`
 - `list_audiences` — audiences currently used across ad sets
+- `get_account_signals` — what the AI sees on a connected account: pixels with fire volume, conversion events (7d/30d counts), custom/lookalike/retargeting audiences with sizes, plus the event ladder (optimize-for-now → graduate-to) and audience plan (exclusions, warm sets, lookalike seed, recommended creates)
+- `list_platform_audiences` — audiences on the connected account with kinds/sizes + plan picks; attach ids via `targeting.customAudienceIds` where `capabilities.listAudiences` is true
+- `list_conversion_events` — pixel / tag events with 7d/30d counts, funnel stage, recommended optimization event, graduation rule
+- `create_audience` — `website_visitors` | `website_event` | `purchasers` | `leads` | `engagement` | `lookalike` on Meta / TikTok / Snapchat / Google; returns the existing audience instead of duplicating
+- `update_optimization_event` — switch a live Meta ad set to another pixel event / custom conversion (event graduation); low volume or a switch inside the 14-day cooldown come back as `warnings`
 - `list_platform_connections` / `connect_chatgpt_ads` / `check_platform_billing`
 - `get_recent_notifications`
 
 ### BYOA hierarchy workflow
+0. `get_account_signals` (which event has volume, which audiences to exclude / retarget / seed; `create_audience` for anything missing)
 1. `create_manual_campaign` (platform + objective + budget)
 2. `create_manual_ad_set` (targeting / audiences)
 3. Meta: `create_meta_ad_creative` → `create_manual_ad`; others: `create_manual_ad` with `imageUrl`
@@ -124,6 +129,14 @@ Load when the user asks about:
 ### Import what is already running
 "Bring my live Google campaigns into Lazy Ads."
 → `list_live_platform_campaigns` (platform=google) → `import_platform_campaign` per id → `sync_all_campaign_performance`
+
+### Pick the right conversion event
+"Should my Meta campaign optimize for Purchase or Lead?"
+→ `list_conversion_events` (platform=meta) — read `eventPlan.primary` / `graduateTo` and the 7d counts; if Purchase already clears ~50/week, `update_optimization_event` on the ad set with `customEventType: "PURCHASE"`
+
+### Build warm audiences before launch
+"Set up retargeting for my Meta account."
+→ `list_platform_audiences` (platform=meta) → `create_audience` for each `plan.recommendedCreates` entry (e.g. `website_visitors` 30d, `purchasers` 180d, `lookalike` from the purchaser seed) → pass ids into `create_manual_ad_set` `targeting.customAudienceIds`
 
 ### Morning Campaign Review
 "Check my campaigns — anything I should be worried about today?"

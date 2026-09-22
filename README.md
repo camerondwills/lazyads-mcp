@@ -66,8 +66,9 @@ npx skills add camerondwills/lazyads-mcp
 
 ## What you get
 
-- **BYOA:** 37 bridge tools to create, update, pause, and measure campaigns on all nine networks — including account signals, conversion events, and audience creation
-- **Starter and above:** full suite (51 tools), including 14 Lazy Ads AI tools
+- **BYOA:** 39 bridge tools to create, update, pause, and measure campaigns on all nine networks — including account signals, conversion events, and audience creation
+- **Starter and above:** full suite (53 tools), including 14 Lazy Ads AI tools
+- **Post-create edits:** `update_ad` (copy, destination URL, Meta url_tags) and `update_ad_set` (name, end date) write Lazy Ads and the live platform when supported, and fail instead of a silent DB-only write
 
 Free accounts can onboard and browse competitor ads. Lazy Ads AI tools require Starter or above. REST and outbound webhooks require Growth or above.
 

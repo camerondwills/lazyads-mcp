@@ -74,7 +74,7 @@ Free accounts can onboard and browse competitor ads. Lazy Ads AI tools require S
 
 ## Pricing
 
-See [lazyads.ai/pricing](https://lazyads.ai/pricing). Plans: BYOA, Starter, Growth, Scale, Enterprise. Flat SaaS, bring your own ad accounts, no percent of spend.
+See [lazyads.ai/pricing](https://lazyads.ai/pricing). Plans: BYOA, Starter, Growth, Scale, Enterprise. Fixed monthly fee, bring your own ad accounts, not a cut of ad spend.
 
 ## Links
 

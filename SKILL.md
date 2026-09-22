@@ -20,8 +20,8 @@ Per-key rate limits (1-minute window): BYOA 60, Starter 30, Growth 100, Scale 50
 Exceeding returns 429 with `Retry-After`.
 
 Two access modes:
-- **Bridge (BYOA + every paid plan)** — 37 tools; your agent supplies strategy/copy; LazyAds is the connector to ad accounts and syncs stats to the dashboard. Never spends Lazy Ads AI credits.
-- **Full MCP (Starter / Growth / Scale / Enterprise)** — 51 tools total; bridge plus 14 Lazy Ads AI tools (campaign build, chat, creative generation, optimisation, competitor AI, activity log).
+- **Bridge (BYOA + every paid plan)** — 39 tools; your agent supplies strategy/copy; LazyAds is the connector to ad accounts and syncs stats to the dashboard. Never spends Lazy Ads AI credits.
+- **Full MCP (Starter / Growth / Scale / Enterprise)** — 53 tools total; bridge plus 14 Lazy Ads AI tools (campaign build, chat, creative generation, optimisation, competitor AI, activity log).
 
 The live catalog with descriptions is at https://lazyads.ai/mcp#tools.
 
@@ -51,12 +51,13 @@ Load when the user asks about:
 - Their ad campaigns (performance, status, spend, ROAS, breakdowns)
 - Creating, importing, pausing, scaling, or building campaigns
 - Syncing live platform metrics into the Lazy Ads dashboard
-- Ad-set level controls: budgets, bids, targeting, keywords
+- Ad-set level controls: budgets, bids, targeting, keywords, name, end date
+- Post-create live ad edits (`update_ad`): copy, destination URL, Meta url_tags (fails instead of a silent DB-only write)
 - Ad creative (browse/attach on any paid plan; generate/score on full MCP)
 - Competitor ad activity (full MCP for Ad Library search and AI analysis)
 - Whether an ad account can spend (`check_platform_billing`)
 
-## Bridge MCP Tools (BYOA-safe, 37)
+## Bridge MCP Tools (BYOA-safe, 39)
 ### Create and publish
 - `create_manual_campaign` — create on Meta/Google/TikTok/LinkedIn/Reddit/Apple/Bing/ChatGPT/Snapchat + Lazy Ads (`aiManaged=false`; LinkedIn = campaign group)
 - `create_manual_ad_set` — ad set / ad group with geo, age, gender, interests, keywords, custom audiences
@@ -75,9 +76,11 @@ Load when the user asks about:
 - `get_ad_details` — full ad set + ad copy + creative details
 - `pause_resume_campaign` / `pause_resume_ad_set` / `pause_resume_ad` — propagates to the live platform
 - `set_campaign_budget` / `set_ad_set_budget` — daily budgets (ad-set budgets on Meta ABO, TikTok, LinkedIn, Reddit)
-- `update_ad_set_targeting` — live audience targeting when the platform API allows it
+- `update_ad_set_targeting` — live audience targeting including Meta Advantage+ / `advantageAudience`
 - `update_ad_set_bid` — manual bid on LinkedIn, TikTok, ChatGPT, or Snapchat (null = LinkedIn auto bid)
 - `add_ad_set_keywords` — Google / Bing / Apple search keywords with match types
+- `update_ad` — live copy, destination URL, and Meta `url_tags` / UTMs (fails instead of DB-only when the platform cannot apply the change)
+- `update_ad_set` — rename an ad set or set its end date (Meta/TikTok end dates)
 
 ### Analytics
 - `get_campaign_performance` / `get_ad_spend_summary` / `get_breakdown_data` / `get_best_performing_creative` / `compare_campaigns`
@@ -146,6 +149,10 @@ Load when the user asks about:
 "Pause any campaigns where CPA is more than 2× my target for 3+ days"
 → identify via performance tools, then `pause_resume_campaign` / `pause_resume_ad_set` / `pause_resume_ad`
 
+### Edit a live ad or ad set
+"Rename the Summer Sale ad set and change the headline plus landing URL on the winning ad."
+→ `update_ad_set` (name / end date) then `update_ad` (copy, destination URL, Meta `url_tags`). Both fail instead of a silent DB-only write when the platform cannot apply the field.
+
 ### Full MCP: AI Campaign Build
 "Build me a Meta campaign for my best-selling product with $50/day budget"
 → `build_ai_campaign` + `get_campaign_build_status` (Starter+ only)
@@ -153,6 +160,7 @@ Load when the user asks about:
 ## Pitfalls
 - BYOA cannot call Lazy Ads AI tools (`build_ai_campaign`, `chat_with_lazy_ads`, `generate_creative`, `scan_competitor_ads`, etc.); the server answers with a plan error, not an OpenRouter error
 - Bridge create/update requires a connected platform account in the dashboard; run `check_platform_billing` before launching spend
+- `update_ad` and `update_ad_set` write the live platform when supported. Published entities fail instead of a silent DB-only write when the API cannot apply the field.
 - Campaign builds (full MCP) take 2–5 minutes — poll with `get_campaign_build_status`
 - Creative generation and AI builds consume monthly AI credits on AI plans
 - LinkedIn and Reddit do not report revenue via API; ROAS can show 0 there

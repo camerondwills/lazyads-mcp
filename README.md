@@ -29,8 +29,8 @@ The plugin adds two things:
 Create the key at [Settings → API Keys](https://lazyads.ai/dashboard/settings?tab=api) in the Lazy Ads
 dashboard (any paid plan: **BYOA** for the bridge, **Starter and above** for the full suite with Lazy Ads
 AI), and connect your ad accounts in the same dashboard. Start a new Hermes session, then ask *"Which ad
-platforms am I connected to?"* to confirm. Until `LAZY_ADS_API_KEY` is set the server simply does not
-connect.
+platforms am I connected to?"* to confirm. Until `LAZY_ADS_API_KEY` is set Hermes refuses to start the server and
+names the missing variable; no request is sent.
 
 Installing straight from this repository, without the catalog:
 

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "lazyads",
+  "version": "1.0.0",
+  "description": "Manage ad campaigns on Meta, Google, TikTok, LinkedIn, Reddit, Apple, Bing, ChatGPT and Snapchat Ads from Hermes through the hosted LazyAds MCP server, with a workflow skill.",
+  "author": {
+    "name": "Lazy Ads",
+    "url": "https://lazyads.ai"
+  },
+  "homepage": "https://lazyads.ai/hermes",
+  "repository": "https://github.com/camerondwills/lazyads-mcp",
+  "license": "MIT",
+  "keywords": [
+    "advertising",
+    "ads",
+    "marketing",
+    "campaigns",
+    "meta-ads",
+    "google-ads",
+    "tiktok-ads",
+    "mcp"
+  ]
+}

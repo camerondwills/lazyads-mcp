@@ -19,5 +19,14 @@
     "google-ads",
     "tiktok-ads",
     "mcp"
-  ]
+  ],
+  "extensions": {
+    "com.nousresearch.hermes": {
+      "servers": {
+        "lazyads": {
+          "trust": "untrusted"
+        }
+      }
+    }
+  }
 }

@@ -38,7 +38,8 @@ Installing straight from this repository, without the catalog:
 hermes plugins install camerondwills/lazyads-mcp
 ```
 
-Prefer no plugin? Use the manual config in `~/.hermes/config.yaml`:
+Prefer no plugin? Add the server to `~/.hermes/config.yaml` with `trust: untrusted`, so Hermes prompts
+before write-capable calls:
 
 ```yaml
 mcp_servers:
@@ -46,6 +47,7 @@ mcp_servers:
     url: "https://mcp.lazyads.ai/mcp"
     headers:
       Authorization: "Bearer ${LAZY_ADS_API_KEY}"
+    trust: untrusted
 ```
 
 ## What you can do
@@ -73,11 +75,11 @@ What this plugin does on your machine and with your data:
 - **Credential.** One API key, read from `LAZY_ADS_API_KEY` through Hermes's own `${VAR}` resolution and
   sent as an `Authorization: Bearer` header on each request. The plugin never reads files, keychains or
   other credential stores, and the header is dropped on any cross-origin redirect.
-- **Spending.** The tools create and edit real campaigns that spend your ad budget. Hermes does not gate
-  them; the bundled skill instructs the agent to confirm platform, objective, budget and targeting with
+- **Spending.** The tools create and edit real campaigns that spend your ad budget. The plugin declares
+  `trust: untrusted` for the `lazyads` server, so Hermes prompts before every write-capable call. The
+  bundled skill still instructs the agent to confirm platform, objective, budget and targeting with
   you before anything is created, published, un-paused or scaled, and to stay read-only in unattended
-  runs. That is an instruction to the model, not an enforcement boundary. To make Hermes ask before every
-  write-capable call, set `trust: untrusted` on the `lazyads` server in your `config.yaml`.
+  runs.
 - **No local processes.** No shell commands, no background processes, no telemetry, no self-update, no
   files written outside Hermes's own plugin directories.
 
@@ -109,7 +111,7 @@ Windsurf uses `serverUrl` instead of `url`. Gemini CLI uses `httpUrl`. VS Code u
 local processes, so bridge it with `mcp-remote` and put the header in `env`. Copy-ready blocks for every
 client: https://lazyads.ai/mcp#setup
 
-The root [`SKILL.md`](./SKILL.md) is the standalone skill for skills.sh:
+[`skills/lazyads/SKILL.md`](skills/lazyads/SKILL.md) is the skill skills.sh installs from this repository:
 
 ```bash
 npx skills add camerondwills/lazyads-mcp

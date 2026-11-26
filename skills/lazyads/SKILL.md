@@ -26,7 +26,8 @@ The live catalog with descriptions is at https://lazyads.ai/mcp#tools.
 
 ## Spend safety (read first)
 These tools create and edit real campaigns on real ad accounts, and a launched campaign spends the
-user's ad budget. Hermes does not gate them; this skill does.
+user's ad budget. The plugin declares `trust: untrusted` for the `lazyads` server, so Hermes
+prompts before every write-capable call. This checklist still applies:
 - Before any tool that creates, publishes, un-pauses, or raises the budget of a campaign, ad set,
   or ad, state the platform, objective, daily budget and targeting, and wait for the user's
   explicit yes. Do not infer consent from an earlier, broader request.
@@ -48,13 +49,15 @@ This skill ships inside the `lazyads` Hermes plugin, which already declares the 
 4. Enable the plugin and start a new session: `hermes plugins enable lazyads`.
 5. Confirm with "Which ad platforms am I connected to?" (`list_platform_connections`).
 
-Not using the plugin? Add the server by hand to `~/.hermes/config.yaml`:
+Not using the plugin? Add the server by hand to `~/.hermes/config.yaml` with `trust: untrusted`, so
+Hermes prompts before write-capable calls:
 ```yaml
 mcp_servers:
   lazyads:
     url: "https://mcp.lazyads.ai/mcp"
     headers:
       Authorization: "Bearer ${LAZY_ADS_API_KEY}"
+    trust: untrusted
 ```
 
 ## When to Use This Skill
